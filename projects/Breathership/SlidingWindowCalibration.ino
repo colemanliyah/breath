@@ -106,6 +106,9 @@ void loop() {
   // Both flags active → breathing cycle complete
   if (inhaleFlag && exhaleFlag) {
     Serial.println("You did it!!!");
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(2000);
+    digitalWrite(LED_BUILTIN, LOW);
     inhaleFlag = false;
     exhaleFlag = false;
   }
