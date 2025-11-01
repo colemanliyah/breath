@@ -1,10 +1,12 @@
-# BreathCycle Art Experience
+# You Can Breath Through Anything
 **Authors:** Liyah Coleman and Brian Bishop  
 
 ---
 
 ## Project Overview
 BreathCycle Art Experience transforms the act of breathing into a **meditative, interactive visual experience**. We aimed to solve the problem of guiding timed meditation **without relying on phones or screens** while capturing subtle chest movements. By tracking inhale and exhale patterns using a wearable IMU sensor, the system provides intuitive feedback through **visual cues**, helping users settle into a calm, mindful state.
+
+![Full Image](images/prototype.jpg)
 
 ---
 
@@ -14,6 +16,9 @@ BreathCycle Art Experience transforms the act of breathing into a **meditative, 
 - **Arduino Nano 33 IoT** with built-in **LSM6DS3 IMU** (gyroscope + accelerometer).  
 - **Polarized lenses** mounted on a servo motor for visual output.  
 - Wearable **necklace design** to position the Arduino near the chest for accurate breath detection.
+
+![Full Image](images/polorized_dark.jpg)
+![Full Image](images/polorized_light.jpg)
 
 ### Software / Process
 1. **Calibration** – Measures the user’s baseline chest motion to define a starting point for inhale/exhale detection.  
@@ -35,13 +40,13 @@ BreathCycle Art Experience transforms the act of breathing into a **meditative, 
 ---
 
 ## Images / Media
-*(Add pictures or GIFs here showing the wearable, polarized lens, or visual output)*
+![Full Image](images/demo.gif)
 
 ---
 
 ## Blog / More Information
 For a detailed write-up and exploration of the project, see our blog:  
-[Project Blog](templink)
+[Project Blog](https://bjb2018.notion.site/You-Can-Breathe-Thru-Anything-27ecc69c745e80d48712f8c3642fc725)
 
 ---
 
