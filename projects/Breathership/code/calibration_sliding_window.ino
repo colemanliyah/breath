@@ -1,9 +1,20 @@
+#include <Dictionary.h>
 #include <Arduino_LSM6DS3.h>
 #include <MadgwickAHRS.h>
 #include <math.h>
+#include "Servo.h"
 
 Madgwick filter;
 const float sensorRate = 104.0;
+
+Servo servoMotor;
+int servoPin = 9;
+
+int breathCount=0;
+int darkCount=4;
+int brightCount=8;
+int completed=12;
+int servoAngle=0;
 
 float inhaleBaseline = 0;
 float exhaleBaseline = 0;
@@ -13,17 +24,20 @@ bool exhaleFlag = false;
 
 // Parameters for stability-based calibration
 const int windowSize = 50;           // Number of readings to consider
-const float stabilityThreshold = 0.6; // Max variation to consider stable
+const float stabilityThreshold = 0.5; // Max variation to consider stable
 float diffWindow[windowSize];        // Circular buffer for recent diffs
 int windowIndex = 0;
 int numValidReadings = 0;
 
 void setup() {
   Serial.begin(9600);
+  //while(!Serial);
   pinMode(LED_BUILTIN, OUTPUT);
+  servoMotor.attach(servoPin);
 
   // --- Before CALIBRATION ---
   Serial.println("Before Calibration, LED Blink");
+  Serial.println("HWEORIWHE");
   for(int i = 0; i < 5; i++){
     digitalWrite(LED_BUILTIN, HIGH);
     delay(500);
@@ -38,6 +52,19 @@ void setup() {
   }
 
   filter.begin(sensorRate);
+
+  // Calibrating Motor
+  servoMotor.write(0);
+  delay(10000);
+
+  Serial.println("before next");
+  for(int i = 0; i < 5; i++){
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(100);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(100);
+  }
+
 
   // --- CALIBRATION ---
   Serial.println("Calibrating... breathe normally until values stabilize");
@@ -76,6 +103,13 @@ void setup() {
     delay(20);
   }
 
+  for(int i = 0; i < 5; i++){
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(500);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(500);
+  }
+
   Serial.println("Calibration complete!");
   Serial.print("Inhale baseline: "); Serial.println(inhaleBaseline);
   Serial.print("Exhale baseline: "); Serial.println(exhaleBaseline);
@@ -103,14 +137,58 @@ void loop() {
     }
   }
 
+  // TODO - If breath gets caught inbetween finishing the if statement and the next breath then rest somehow
   // Both flags active → breathing cycle complete
   if (inhaleFlag && exhaleFlag) {
     Serial.println("You did it!!!");
     digitalWrite(LED_BUILTIN, HIGH);
-    delay(2000);
-    digitalWrite(LED_BUILTIN, LOW);
     inhaleFlag = false;
     exhaleFlag = false;
+
+    //Serial.println(rotationCount);
+    if (breathCount < darkCount) {
+      int prevServo = servoAngle;
+      servoAngle = servoAngle + floor(90/darkCount);
+      Serial.println(servoAngle);
+
+      for (int i=prevServo; i<=servoAngle; i++){
+        servoMotor.write(i);
+        delay(200);
+      }
+      digitalWrite(LED_BUILTIN, LOW);
+    }
+
+    if ((brightCount <= breathCount) && (breathCount < completed)) {
+      Serial.println("in completed circuit");
+      digitalWrite(LED_BUILTIN, HIGH);
+      int currentServo = servoAngle;
+      servoAngle = servoAngle - floor(90/darkCount);
+      //Serial.println(servoAngle);
+
+      for (int i=currentServo; i>=servoAngle; i--) {
+        servoMotor.write(i);
+        delay(200);
+      }
+      digitalWrite(LED_BUILTIN, LOW);
+    }
+    
+    if (breathCount >= completed){
+      servoMotor.write(0);
+    }
+
+    breathCount = breathCount + 1;
+    Serial.println("breath count");
+    Serial.println(breathCount);
+    for(int i=0; i<breathCount; i++){
+      digitalWrite(LED_BUILTIN, HIGH);
+      delay(10);
+      digitalWrite(LED_BUILTIN, LOW);
+      delay(10);
+      digitalWrite(LED_BUILTIN, HIGH);
+      delay(10);
+      digitalWrite(LED_BUILTIN, LOW);
+      delay(10);
+    }
   }
 
   prevDiff = currentDiff;
