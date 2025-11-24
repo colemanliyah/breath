@@ -51,4 +51,4 @@ For a detailed write-up and exploration of the project, see our blog:
 ---
 
 ## License
-Specify your license here (e.g., MIT, GPL, etc.).
+MIT license 
