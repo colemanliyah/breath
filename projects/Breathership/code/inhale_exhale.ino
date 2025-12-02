@@ -123,7 +123,6 @@ void loop() {
     exhaleFlag = false;  // reset
     Serial.println("INHALE");
     digitalWrite(2, HIGH);
-
   }
 
   // Detect exhale: EMA rising and crosses a local peak
