@@ -17,13 +17,8 @@ void loop() {
   int curr_val = digitalRead(A5); 
   Serial.println(curr_val);
 
-  // if(curr_val == 0) {
-  //   switchOffPumps();
-  //   vent();
-  // } else if (curr_val == 1) {
-  //   switchOnPumps(100);
-  //   blow();
-  // } 
+  // If recieve a high signal blow else vent
+  // Blue and red for manual control 
   if (curr_val == 1) {
     Serial.println("pop");
     switchOnPumps(100);
@@ -42,16 +37,6 @@ void loop() {
     switchOffPumps();
     closeAllValves();
   }
-   
-
-//   if (readBtn(BLUE)){
-//     switchOffPumps();
-//     vent();
-//  }
-//  if (readBtn(RED)){
-//     switchOnPumps(100);
-//     blow();
-//  }
 
 // Debugging: 
   // if (readBtn(RED)){
