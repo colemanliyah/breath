@@ -4,7 +4,7 @@
 ---
 
 ## Project Overview
-Breathership uses IMU sensors noninvasively placed on each user’s stomach—like butterflies in your stomach—to track breathing. When both users’ breaths synchronize, a programmable air system inflates a balloon, providing a visual representation of their shared rhythm.
+Breathership is an interactive installation using IMU sensors noninvasively placed on each user’s stomach—like butterflies in your stomach—to track breathing. When both users’ breaths synchronize, a programmable air system inflates a balloon, creating a visual representation of their shared rhythm.
 
 ![Full Image](images/prototype.jpg)
 
