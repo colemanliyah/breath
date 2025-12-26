@@ -1,10 +1,10 @@
-# You Can Breath Through Anything
+# Breath Activated Meditation (BAM) - Wearable Microcontroller
 **Authors:** Liyah Coleman and Brian Bishop  
 
 ---
 
 ## Project Overview
-BreathCycle Art Experience transforms the act of breathing into a **meditative, interactive visual experience**. We aimed to solve the problem of guiding timed meditation **without relying on phones or screens** while capturing subtle chest movements. By tracking inhale and exhale patterns using a wearable IMU sensor, the system provides intuitive feedback through **visual cues**, helping users settle into a calm, mindful state.
+BAM transforms the act of breathing into a **meditative, interactive visual experience**. We aimed to solve the problem of guiding timed meditation **without relying on phones or screens** while capturing subtle chest movements. By tracking inhale and exhale patterns using a wearable IMU sensor, the system provides intuitive feedback through **visual cues**, helping users settle into a calm, mindful state.
 
 ![Full Image](images/prototype.jpg)
 
