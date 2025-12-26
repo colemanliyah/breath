@@ -17,7 +17,7 @@ Breathership is an interactive installation using IMU sensors noninvasively plac
 - **Programmable Air** encased with pumps to blow and vent air.  
 - Fabricated **butterfly wings** to position the Arduino on the belly for accurate breath detection.
 
-![Full Image](images/wings.jpg)
+![Full Image](images/butterflywings.jpg)
 
 ### Software / Process
 1. **Calibration** – Exponential moving average to calibrate and recalibrate in real time.
@@ -37,7 +37,7 @@ Breathership is an interactive installation using IMU sensors noninvasively plac
 ---
 
 ## Images / Media
-![Full Image](images/timelapse.gif)
+![Full Image](images/playtest.gif)
 
 ---
 
