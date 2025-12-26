@@ -7,7 +7,6 @@
 Breathership is an interactive installation using IMU sensors noninvasively placed on each user’s stomach—like butterflies in your stomach—to track breathing. When both users’ breaths synchronize, a programmable air system inflates a balloon, creating a visual representation of their shared rhythm.
 
 ![Full Image](images/setup.jpg)
-![Full Image](images/MeandBrian.jpg)
 
 ---
 
@@ -18,7 +17,7 @@ Breathership is an interactive installation using IMU sensors noninvasively plac
 - **Programmable Air** encased with pumps to blow and vent air.  
 - Fabricated **butterfly wings** to position the Arduino on the belly for accurate breath detection.
 
-![Full Image](images/butterfly.jpg)
+![Full Image](images/participants.jpg)
 
 ### Software / Process
 1. **Calibration** – Exponential moving average to calibrate and recalibrate in real time.
