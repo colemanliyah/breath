@@ -1,4 +1,4 @@
-# Breath Activated Meditation (BAM) - Wearable Microcontroller
+# Breathership
 **Authors:** [Liyah Coleman](https://colemanliyah.github.io/) and [Brian Bishop](https://2b3.myportfolio.com/)  
 
 ---
