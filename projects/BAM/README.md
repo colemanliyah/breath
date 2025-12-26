@@ -1,10 +1,10 @@
 # Breath Activated Meditation (BAM) - Wearable Microcontroller
-**Authors:** Liyah Coleman and Brian Bishop  
+**Authors:** [Liyah Coleman](https://colemanliyah.github.io/) and [Brian Bishop](https://2b3.myportfolio.com/)  
 
 ---
 
 ## Project Overview
-BAM transforms the act of breathing into a **meditative, interactive visual experience**. We aimed to solve the problem of guiding timed meditation **without relying on phones or screens** while capturing subtle chest movements. By tracking inhale and exhale patterns using a wearable IMU sensor, the system provides intuitive feedback through **visual cues**, helping users settle into a calm, mindful state.
+A screen-free wearable that guides breathing and meditation. Using IMU sensor data, it tracks users’ breath in real time and syncs a polarized lens to subtly darken and brighten, leading users through a timed meditation.
 
 ![Full Image](images/prototype.jpg)
 
