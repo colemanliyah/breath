@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Breath Scroll</title>
+<style>
+  :root { --bg:#0f1115; --fg:#e8e6e3; --mut:#8b8f98; --acc:#7fd1b9; }
+  * { box-sizing:border-box; margin:0; }
+  html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--fg); font:14px system-ui, sans-serif; }
+
+  #bar { position:fixed; inset:0 0 auto 0; z-index:5; display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center;
+         padding:10px 16px; background:rgba(15,17,21,.82); backdrop-filter:blur(8px); border-bottom:1px solid #222730; }
+  button { background:var(--acc); color:#0b0e12; border:0; border-radius:8px; padding:7px 14px; font:inherit; font-weight:600; cursor:pointer; }
+  button:disabled { opacity:.4; cursor:not-allowed; }
+  #msg { color:var(--mut); min-width:120px; }
+  #phase { font-weight:700; letter-spacing:.08em; min-width:72px; }
+  #flow { width:140px; height:8px; background:#222730; border-radius:4px; overflow:hidden; }
+  #flowfill { height:100%; width:0; background:var(--acc); }
+  label { color:var(--mut); display:flex; align-items:center; gap:6px; font-size:12px; }
+  input[type=range] { width:90px; accent-color:var(--acc); }
+  #hint { position:fixed; left:16px; bottom:12px; z-index:5; color:var(--mut); font-size:12px;
+          background:rgba(15,17,21,.7); padding:4px 8px; border-radius:6px; }
+
+  #feed { display:flex; gap:14px; padding:70px 14px 0; will-change:transform; }
+  .col { display:flex; flex-direction:column; gap:14px; flex:none; }
+  .card { border-radius:14px; overflow:hidden; flex:none; }
+  .card img { width:100%; height:100%; object-fit:cover; display:block; opacity:0; transition:opacity .6s; }
+  .card img.in { opacity:1; }
+</style>
+</head>
+<body>
+
+<div id="bar">
+  <button id="connect">Connect Arduino</button>
+  <span id="msg">Not connected</span>
+  <span id="phase">—</span>
+  <div id="flow" title="scroll speed"><div id="flowfill"></div></div>
+  <label>max speed <input id="maxSpeed" type="range" min="100" max="1000" step="50" value="400"></label>
+  <label>full speed at <input id="fullSec" type="range" min="2" max="10" step="0.5" value="5"><span id="fullSecVal">5s</span></label>
+</div>
+<div id="feed"></div>
+<div id="hint">Test without the board: hold Space (down = inhale, up = exhale)</div>
+
+<script>
+// ---------- settings ----------
+const cfg = { maxSpeed: 400, minSec: 0, fullSec: 5 };   // px/s, seconds
+// Scrolls only while exhaling. Every exhale moves the page; speed grows with the square of exhale length, reaching maxSpeed at fullSec.
+
+const GAP = 14;
+const $ = id => document.getElementById(id);
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+
+// ---------- breath state ----------
+let state = 'NONE';                 // NONE | INHALE | EXHALE
+let phaseStart = performance.now();
+let lastLen = 0;                    // length (s) of the previous breath phase
+let v = 0, pos = 0;                 // current speed (px/s), scroll position (px)
+
+function setPhase(s) {
+  const now = performance.now();
+  if (state !== 'NONE') lastLen = (now - phaseStart) / 1000;
+  state = s;
+  phaseStart = now;
+  $('phase').textContent = s === 'NONE' ? '—' : s;
+}
+
+// ---------- Arduino over USB (Web Serial) ----------
+function onLine(line) {
+  if (line === 'INHALE' || line === 'EXHALE') setPhase(line);
+  else if (line) $('msg').textContent = line;      // calibration messages, breath counts, etc.
+}
+
+async function connect() {
+  try {
+    const port = await navigator.serial.requestPort();
+    await port.open({ baudRate: 115200 });
+    $('connect').disabled = true;
+    $('msg').textContent = 'Connected';
+    setPhase('NONE');
+
+    // tell the sketch to restart warmup + calibration ('R')
+    const writer = port.writable.getWriter();
+    await writer.write(new TextEncoder().encode('R'));
+    writer.releaseLock();
+
+    const dec = new TextDecoderStream();
+    port.readable.pipeTo(dec.writable).catch(() => {});
+    const reader = dec.readable.getReader();
+    let buf = '';
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += value;
+      let i;
+      while ((i = buf.indexOf('\n')) >= 0) {
+        onLine(buf.slice(0, i).trim());
+        buf = buf.slice(i + 1);
+      }
+    }
+  } catch (e) {
+    $('msg').textContent = 'Error: ' + e.message;
+  } finally {
+    $('connect').disabled = false;
+    if ($('msg').textContent === 'Connected') $('msg').textContent = 'Disconnected';
+    setPhase('NONE');
+  }
+}
+
+if ('serial' in navigator) $('connect').onclick = connect;
+else { $('connect').disabled = true; $('msg').textContent = 'Use Chrome or Edge for USB'; }
+
+// keyboard stand-in for testing
+addEventListener('keydown', e => { if (e.code === 'Space' && !e.repeat) { e.preventDefault(); setPhase('INHALE'); } });
+addEventListener('keyup',   e => { if (e.code === 'Space') { e.preventDefault(); setPhase('EXHALE'); } });
+
+// ---------- sliders ----------
+$('maxSpeed').oninput = e => { cfg.maxSpeed = +e.target.value; };
+$('fullSec').oninput = e => {
+  cfg.fullSec = +e.target.value;
+  $('fullSecVal').textContent = cfg.fullSec + 's';
+};
+
+// ---------- masonry feed (images from picsum.photos) ----------
+const feed = $('feed');
+let cards = [], cols = [], colH = [], colW = 0;
+
+function makeCard() {
+  return { seed: Math.floor(Math.random() * 1e6), ratio: 0.7 + Math.random() * 0.9, hue: Math.floor(Math.random() * 360) };
+}
+
+function addToDom(c) {
+  const k = colH.indexOf(Math.min(...colH));          // shortest column
+  const h = colW * c.ratio;
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.style.height = h + 'px';
+  el.style.background = `hsl(${c.hue} 25% 22%)`;
+  const img = new Image();
+  img.alt = '';
+  img.src = `https://picsum.photos/seed/${c.seed}/${Math.round(colW * 2)}/${Math.round(h * 2)}`;
+  img.onload = () => img.classList.add('in');
+  el.appendChild(img);
+  cols[k].appendChild(el);
+  colH[k] += h + GAP;
+}
+
+function layout() {
+  feed.innerHTML = '';
+  const n = Math.max(2, Math.floor((innerWidth - GAP) / (240 + GAP)));
+  colW = (innerWidth - GAP * (n + 1)) / n;
+  cols = []; colH = new Array(n).fill(0);
+  for (let i = 0; i < n; i++) {
+    const d = document.createElement('div');
+    d.className = 'col';
+    d.style.width = colW + 'px';
+    feed.appendChild(d);
+    cols.push(d);
+  }
+  cards.forEach(addToDom);
+}
+
+function more(n) {
+  for (let i = 0; i < n; i++) { const c = makeCard(); cards.push(c); addToDom(c); }
+}
+
+addEventListener('resize', layout);
+layout();
+more(24);
+
+// ---------- scroll loop: speed follows breath length ----------
+let last = performance.now();
+function tick(now) {
+  const dt = Math.min(0.1, (now - last) / 1000);
+  last = now;
+
+  let target = 0;
+  if (state === 'EXHALE') {                            // scroll only while exhaling
+    const len = (now - phaseStart) / 1000;             // how long this exhale has lasted
+    const x = clamp(len / cfg.fullSec, 0, 1);
+    target = cfg.maxSpeed * x * x;                     // short = friction, long = flow
+  }
+
+  const tau = target > v ? 0.35 : 0.3;                  // slow to speed up, quicker to brake
+  v += (target - v) * (1 - Math.exp(-dt / tau));
+  pos += v * dt;
+
+  feed.style.transform = `translate3d(0,${-pos}px,0)`;
+  $('flowfill').style.width = (100 * v / cfg.maxSpeed) + '%';
+
+  if (pos + innerHeight > Math.min(...colH) - 1200) more(8);   // infinite feed
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
