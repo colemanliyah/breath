@@ -1,0 +1,4 @@
+# WiFi credentials etc. - never commit
+secrets.h
+*.secret
+.DS_Store
